@@ -208,7 +208,7 @@ class MyCustomLayout: UICollectionViewLayout {
             for _ in 0..<numChildren {
                 let childIndexPath = NSIndexPath(forItem: item, inSection: section + 1)
                 attributes.children.append(childIndexPath)
-                ++item
+                item += 1
             }
             itemCountInSection[section + 1] = item
         }
