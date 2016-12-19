@@ -15,17 +15,17 @@ class MyCustomCell: UICollectionViewCell {
         get {return super.frame}
         set {
             super.frame = newValue
-            let subframe = CGRect(origin: CGPointZero, size: newValue.size)
+            let subframe = CGRect(origin: CGPoint.zero, size: newValue.size)
             self.textLabel.frame = subframe
         }
     }
     
     override init(frame: CGRect) {
-        let subframe = CGRect(origin: CGPointZero, size: frame.size)
+        let subframe = CGRect(origin: CGPoint.zero, size: frame.size)
         textLabel = UILabel(frame: subframe)
-        textLabel.backgroundColor = UIColor.blueColor()
-        textLabel.textColor = UIColor.whiteColor()
-        textLabel.textAlignment = NSTextAlignment.Center
+        textLabel.backgroundColor = UIColor.blue
+        textLabel.textColor = UIColor.white
+        textLabel.textAlignment = NSTextAlignment.center
         textLabel.adjustsFontSizeToFitWidth = true
         super.init(frame: frame)
         self.contentView.addSubview(self.textLabel)
@@ -35,7 +35,7 @@ class MyCustomCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
  
-    override func drawRect(rect: CGRect) {
-        super.drawRect(rect)
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
     }
 }

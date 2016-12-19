@@ -44,11 +44,11 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         fillClassInfo()
-        self.collectionView!.registerClass(MyCustomCell.self, forCellWithReuseIdentifier: ClassCellID)
-        self.collectionView!.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: EmptyCellID)
-        self.collectionView!.registerClass(MyConnectionView.self, forSupplementaryViewOfKind: "ConnectionViewKind", withReuseIdentifier: SupplementaryViewID)
+        self.collectionView!.register(MyCustomCell.self, forCellWithReuseIdentifier: ClassCellID)
+        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: EmptyCellID)
+        self.collectionView!.register(MyConnectionView.self, forSupplementaryViewOfKind: "ConnectionViewKind", withReuseIdentifier: SupplementaryViewID)
         self.collectionView!.reloadData()
-        self.collectionView!.backgroundColor = UIColor.whiteColor()
+        self.collectionView!.backgroundColor = UIColor.white
     }
 
     override func didReceiveMemoryWarning() {
@@ -68,7 +68,8 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
         fillNumRowsForClassAndChildren(classInfoByName["NSObject"]!, inSection: 0)
     }
     
-    private func fillNumRowsForClassAndChildren(classInfo: ClassInfo, inSection section: Int) -> Int {
+    @discardableResult
+    private func fillNumRowsForClassAndChildren(_ classInfo: ClassInfo, inSection section: Int) -> Int {
         if section < classInfoBySection.count {
             classInfoBySection[section].append(classInfo)
         } else {
@@ -87,7 +88,7 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
     }
 
     //MARK: MyCustomProtocol
-    func numRowsForClassAndChildrenAtIndexPath(indexPath: NSIndexPath) -> Int {
+    func numRowsForClassAndChildrenAtIndexPath(_ indexPath: IndexPath) -> Int {
         let item = indexPath.item
         let section = indexPath.section
         if section < classInfoBySection.count
@@ -97,7 +98,7 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
             return 0
         }
     }
-    func numChildrenForClassAtIndexPath(indexPath: NSIndexPath) -> Int {
+    func numChildrenForClassAtIndexPath(_ indexPath: IndexPath) -> Int {
         let item = indexPath.item
         let section = indexPath.section
         if section < classInfoBySection.count
@@ -109,32 +110,32 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
     }
     
     //MARK: UICollectionViewDataSource
-    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return classInfoBySection.count
     }
     
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return classInfoBySection[section].count
     }
     
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let item = indexPath.item
         let section = indexPath.section
         if section < classInfoBySection.count
             && item < classInfoBySection[section].count
         {
             let classInfo = classInfoBySection[section][item]
-            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(ClassCellID, forIndexPath: indexPath) as! MyCustomCell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ClassCellID, for: indexPath) as! MyCustomCell
             cell.textLabel.text = classInfo.name
             return cell
         } else {
-            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(EmptyCellID, forIndexPath: indexPath)
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmptyCellID, for: indexPath)
             return cell
         }
     }
     
-    override func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
-        let view = collectionView.dequeueReusableSupplementaryViewOfKind(kind, withReuseIdentifier: SupplementaryViewID, forIndexPath: indexPath) as! MyConnectionView
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SupplementaryViewID, for: indexPath) as! MyConnectionView
         return view
     }
 }

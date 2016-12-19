@@ -26,11 +26,10 @@ let ARRANGE_WIDTH = GAP_WIDTH + ITEM_WIDTH
 let ARRANGE_HEIGHT = GAP_HEIGHT + ITEM_HEIGHT
 
 class MyCustomLayoutAttributes: UICollectionViewLayoutAttributes {
-    var children: [NSIndexPath] = []
+    var children: [IndexPath] = []
     
-    override func isEqual(object: AnyObject?) -> Bool {
-        if let otherAttributes = object as? MyCustomLayoutAttributes
-        where self.children == otherAttributes.children {
+    override func isEqual(_ object: Any?) -> Bool {
+        if let otherAttributes = object as? MyCustomLayoutAttributes, self.children == otherAttributes.children {
             return super.isEqual(object)
         }
         return false
@@ -45,8 +44,8 @@ class MySupplementaryAttributes: UICollectionViewLayoutAttributes {
     var hasNextSibling: Bool = false
     var height: Int = 1
 
-    override func copyWithZone(zone: NSZone) -> AnyObject {
-        let copy = super.copyWithZone(zone) as! MySupplementaryAttributes
+    override func copy(with zone: NSZone?) -> Any {
+        let copy = super.copy(with: zone) as! MySupplementaryAttributes
         copy.baseFrame = self.baseFrame
         copy.hasPreviousSibling = self.hasPreviousSibling
         copy.hasNextSibling = self.hasNextSibling
@@ -54,9 +53,8 @@ class MySupplementaryAttributes: UICollectionViewLayoutAttributes {
         return copy
     }
     
-    override func isEqual(object: AnyObject?) -> Bool {
-        if let otherAttributes = object as? MySupplementaryAttributes
-            where CGRectEqualToRect(self.baseFrame, otherAttributes.baseFrame)
+    override func isEqual(_ object: Any?) -> Bool {
+        if let otherAttributes = object as? MySupplementaryAttributes, self.baseFrame.equalTo(otherAttributes.baseFrame)
             && self.hasPreviousSibling == otherAttributes.hasPreviousSibling
             && self.hasNextSibling == otherAttributes.hasNextSibling
             && self.height == otherAttributes.height
@@ -66,7 +64,7 @@ class MySupplementaryAttributes: UICollectionViewLayoutAttributes {
         return false
     }
     
-    private func fillFrame() {
+    fileprivate func fillFrame() {
         var myFrame = baseFrame
         myFrame.origin.x = baseFrame.origin.x - GAP_WIDTH
         myFrame.size.width = GAP_WIDTH
@@ -84,41 +82,41 @@ class MySupplementaryAttributes: UICollectionViewLayoutAttributes {
 
 
 @objc protocol MyCustomProtocol {
-    func numRowsForClassAndChildrenAtIndexPath(indexPath: NSIndexPath) -> Int
+    func numRowsForClassAndChildrenAtIndexPath(_ indexPath: IndexPath) -> Int
     //###
-    func numChildrenForClassAtIndexPath(indexPath: NSIndexPath) -> Int
+    func numChildrenForClassAtIndexPath(_ indexPath: IndexPath) -> Int
 }
 
 
 class MyCustomLayout: UICollectionViewLayout {
     weak var customDataSource: MyCustomProtocol!
     
-    typealias CellInformationType = [NSIndexPath: UICollectionViewLayoutAttributes]
+    typealias CellInformationType = [IndexPath: UICollectionViewLayoutAttributes]
     private var layoutInformation: [String: CellInformationType] = [:]
     private var maxNumRows: Int = 0
     private let insets: UIEdgeInsets = UIEdgeInsetsMake(INSET_TOP, INSET_LEFT, INSET_BOTTOM, INSET_RIGHT)
     
     private var itemCountInSection: [Int] = []
-    override func prepareLayout() {
+    override func prepare() {
         //###var layoutInformation: [String: CellInformationType] = [:]
         var cellInformation: CellInformationType = [:]
-        let numSections = self.collectionView!.numberOfSections()
-        itemCountInSection = Array(count: numSections, repeatedValue: 0) //###used in attributesWithChildrenAtIndexPath
+        let numSections = self.collectionView!.numberOfSections
+        itemCountInSection = Array(repeating: 0, count: numSections) //###used in attributesWithChildrenAtIndexPath
         for section in 0..<numSections {
-            let numItems = self.collectionView!.numberOfItemsInSection(section)
+            let numItems = self.collectionView!.numberOfItems(inSection: section)
             for item in 0..<numItems {
-                let indexPath = NSIndexPath(forItem: item, inSection: section)
+                let indexPath = IndexPath(item: item, section: section)
                 let attributes = self.attributesWithChildrenAtIndexPath(indexPath)
                 cellInformation[indexPath] = attributes
             }
         }
         layoutInformation["MyCellKind"] = cellInformation //###
         //
-        for section in (0..<numSections).reverse() {
-            let numItems = self.collectionView!.numberOfItemsInSection(section)
+        for section in (0..<numSections).reversed() {
+            let numItems = self.collectionView!.numberOfItems(inSection: section)
             var totalHeight = 0
             for item in 0..<numItems {
-                let indexPath = NSIndexPath(forItem: item, inSection: section)
+                let indexPath = IndexPath(item: item, section: section)
                 let attributes = cellInformation[indexPath]! // 1
                 attributes.frame = self.frameForCellAtIndexPath(indexPath, withHeight: totalHeight)
                 self.adjustFramesOfChildrenAndConnectorsForClassAtIndexPath(indexPath) // 2
@@ -131,19 +129,19 @@ class MyCustomLayout: UICollectionViewLayout {
         //
         var supplementaryInfo: CellInformationType = [:]
         for section in 1..<numSections {    //###
-            let numItems = self.collectionView!.numberOfItemsInSection(section)
+            let numItems = self.collectionView!.numberOfItems(inSection: section)
             for item in 0..<numItems {
-                let indexPath = NSIndexPath(forItem: item, inSection: section)
-                let supplementaryAttributes = MySupplementaryAttributes(forSupplementaryViewOfKind: "ConnectionViewKind", withIndexPath: indexPath)
+                let indexPath = IndexPath(item: item, section: section)
+                let supplementaryAttributes = MySupplementaryAttributes(forSupplementaryViewOfKind: "ConnectionViewKind", with: indexPath)
                 supplementaryInfo[indexPath] = supplementaryAttributes
             }
         }
         //###
         layoutInformation["ConnectionViewKind"] = supplementaryInfo
         for section in 0..<numSections - 1 {    //###
-            let numItems = self.collectionView!.numberOfItemsInSection(section)
+            let numItems = self.collectionView!.numberOfItems(inSection: section)
             for item in 0..<numItems {
-                let indexPath = NSIndexPath(forItem: item, inSection: section)
+                let indexPath = IndexPath(item: item, section: section)
                 let layoutAttribute = layoutInformation["MyCellKind"]![indexPath]! as! MyCustomLayoutAttributes
                 fillSupplementaryAttribute(layoutAttribute)
             }
@@ -151,8 +149,8 @@ class MyCustomLayout: UICollectionViewLayout {
         //self.layoutInformation = layoutInformation //###
     }
     
-    private func fillSupplementaryAttribute(layoutAttribute: MyCustomLayoutAttributes) {
-        for (index, childIndexPath) in layoutAttribute.children.enumerate() {
+    private func fillSupplementaryAttribute(_ layoutAttribute: MyCustomLayoutAttributes) {
+        for (index, childIndexPath) in layoutAttribute.children.enumerated() {
             let childLayoutAttribute = layoutInformation["MyCellKind"]![childIndexPath]! as! MyCustomLayoutAttributes
             let childSupplementaryAttribute = layoutInformation["ConnectionViewKind"]![childIndexPath]! as! MySupplementaryAttributes
             childSupplementaryAttribute.hasPreviousSibling = (index > 0)
@@ -163,18 +161,18 @@ class MyCustomLayout: UICollectionViewLayout {
         }
     }
     
-    override func collectionViewContentSize() -> CGSize {
-        let width = CGFloat(self.collectionView!.numberOfSections()) * (ITEM_WIDTH + self.insets.left + self.insets.right)
+    override var collectionViewContentSize : CGSize {
+        let width = CGFloat(self.collectionView!.numberOfSections) * (ITEM_WIDTH + self.insets.left + self.insets.right)
         let height = CGFloat(self.maxNumRows) * (ITEM_HEIGHT + insets.top + insets.bottom)
-        return CGSizeMake(width, height)
+        return CGSize(width: width, height: height)
     }
     
-    override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         var myAttributes: [UICollectionViewLayoutAttributes] = []
         myAttributes.reserveCapacity(self.layoutInformation.count)
         for (_, attributesDict) in self.layoutInformation {
             for (_, attributes) in attributesDict {
-                if CGRectIntersectsRect(rect, attributes.frame) {
+                if rect.intersects(attributes.frame) {
                     myAttributes.append(attributes) //###
                 }
             }
@@ -182,31 +180,30 @@ class MyCustomLayout: UICollectionViewLayout {
         return myAttributes
     }
     
-    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return self.layoutInformation["MyCellKind"]![indexPath] //###
     }
     
-    override func layoutAttributesForSupplementaryViewOfKind(kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+    override func layoutAttributesForSupplementaryView(ofKind kind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return self.layoutInformation[kind]?[indexPath] //###
     }
 
     //###
-    override class func layoutAttributesClass() -> AnyClass {
+    override class var layoutAttributesClass : AnyClass {
         return MyCustomLayoutAttributes.self
     }
     
-    private func attributesWithChildrenAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
-        //###
+    private func attributesWithChildrenAtIndexPath(_ indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         //instantiate layout attributes
-        let attributesClass = self.dynamicType.layoutAttributesClass() as! MyCustomLayoutAttributes.Type
-        let attributes = attributesClass.init(forCellWithIndexPath: indexPath)
+        let attributesClass = type(of: self).layoutAttributesClass as! MyCustomLayoutAttributes.Type
+        let attributes = attributesClass.init(forCellWith: indexPath)
         //fill children indexPaths
         let section = indexPath.section
         let numChildren = customDataSource.numChildrenForClassAtIndexPath(indexPath)
         if numChildren > 0 {
             var item = itemCountInSection[section + 1]
             for _ in 0..<numChildren {
-                let childIndexPath = NSIndexPath(forItem: item, inSection: section + 1)
+                let childIndexPath = IndexPath(item: item, section: section + 1)
                 attributes.children.append(childIndexPath)
                 item += 1
             }
@@ -215,7 +212,7 @@ class MyCustomLayout: UICollectionViewLayout {
         return attributes
     }
     
-    private func frameForCellAtIndexPath(indexPath: NSIndexPath, withHeight height: Int) -> CGRect {
+    private func frameForCellAtIndexPath(_ indexPath: IndexPath, withHeight height: Int) -> CGRect {
         //###
         let x = CGFloat(indexPath.section) * ARRANGE_WIDTH + insets.left + OFFSET_LEFT
         let y = CGFloat(height) * ARRANGE_HEIGHT + insets.top + OFFSET_TOP
@@ -223,7 +220,7 @@ class MyCustomLayout: UICollectionViewLayout {
         return rect
     }
     
-    private func adjustFramesOfChildrenAndConnectorsForClassAtIndexPath(indexPath: NSIndexPath) {
+    private func adjustFramesOfChildrenAndConnectorsForClassAtIndexPath(_ indexPath: IndexPath) {
         //###
         let attributes = layoutInformation["MyCellKind"]![indexPath]! as! MyCustomLayoutAttributes
         var height = 0
