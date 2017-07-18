@@ -3,7 +3,7 @@
 //  CustomLayoutsWorked
 //
 //  Created by OOPer in cooperation with shlab.jp, on 2015/8/15.
-//  Copyright © 2015 OOPer (NAGATA, Atsuyuki). All rights reserved. See LICENSE.txt .
+//  Copyright © 2015-2017 OOPer (NAGATA, Atsuyuki). All rights reserved. See LICENSE.txt .
 //
 
 import UIKit
@@ -48,7 +48,7 @@ class ViewController: UICollectionViewController, MyCustomProtocol {
         self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: EmptyCellID)
         self.collectionView!.register(MyConnectionView.self, forSupplementaryViewOfKind: "ConnectionViewKind", withReuseIdentifier: SupplementaryViewID)
         self.collectionView!.reloadData()
-        self.collectionView!.backgroundColor = UIColor.white
+        self.collectionView!.backgroundColor = .white
     }
 
     override func didReceiveMemoryWarning() {

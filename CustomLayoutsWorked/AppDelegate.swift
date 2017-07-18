@@ -3,7 +3,7 @@
 //  CustomLayoutsWorked
 //
 //  Created by OOPer in cooperation with shlab.jp, on 2015/8/15.
-//  Copyright © 2015 OOPer (NAGATA, Atsuyuki). All rights reserved. See LICENSE.txt .
+//  Copyright © 2015-2017 OOPer (NAGATA, Atsuyuki). All rights reserved. See LICENSE.txt .
 //
 
 import UIKit
